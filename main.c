@@ -43,6 +43,8 @@ int main()
         if (nivel_atual > 100) nivel_atual = 100;
         if (nivel_atual < 0) nivel_atual = 0;
 
+        // AQUI função para ler o potênciometro
+
         // Verifica se a bomba deve ser ligada ou desligada    
         if (nivel_atual < limite_min) {
             bomba_estado = 1;
@@ -50,6 +52,13 @@ int main()
             bomba_estado = 0;
         }
 
+        // Função para escrever as informações no display
+
+        // Função para atualizar a matriz de LEDs e representar o nível do reservatório
+
+        // Função para acionar o LED RGB correspondente ao estado da bomba
+
+        // Função para emitir alerta com o buzzer
         sleep_ms(300);
     }
     cyw43_arch_deinit();
