@@ -4,44 +4,142 @@
 #include "pico/cyw43_arch.h" // Bibliotea para Wi-Fi no Raspberry Pi Pico W
 #include "lwip/tcp.h" // Biblioteca para TCP/IP
 
-#define LED_RED 13
+
+
+int nivel_atual = 50;      // Simulado, pode vir de sensor
+int bomba_ligada = 0;      // 0 = desligada, 1 = ligada
+int limite_min = 30;       // Limite mínimo inicial
+int limite_max = 90;       // Limite máximo inicial
+
 
 #include "credenciais.h" // Arquivo com SSID e Senha do Wi-Fi
 
 const char HTML_BODY[] =
-    "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle de nível de abastecimento</title>"
-    "<style>"
-    "body { font-family: sans-serif; text-align: center; padding: 10px; margin: 0; background: #f9f9f9; }"
-    ".botao { font-size: 20px; padding: 10px 30px; margin: 10px; border: none; border-radius: 8px; }"
-    ".on { background: #4CAF50; color: white; }"
-    ".off { background: #f44336; color: white; }"
-    "@media (max-width: 600px) { .botao { width: 80%; font-size: 18px; } }"
-    "</style>"
+"<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle de Nível</title>"
+"<style>"
+"body {"
+"  font-family: 'Segoe UI', sans-serif;"
+"  text-align: center;"
+"  background: linear-gradient(135deg, #e0f7fa, #f1f8e9);"
+"  padding: 20px;"
+"  color: #2c3e50;"
+"}"
 
-    "<script>"
-    "function sendCommand(cmd) { fetch('/led/' + cmd); }"
-    "function atualizar() {"
-    "  fetch('/estado').then(res => res.json()).then(data => {"
-    "    document.getElementById('estado').innerText = data.led ? 'Ligado' : 'Desligado';"
-    "  });"
-    "}"
-    "setInterval(atualizar, 1000);"
-    "</script></head><body>"
+"h1 {"
+"  color: #2c3e50;"
+"  margin-bottom: 10px;"
+"}"
 
-    "<h1>Controle do LED</h1>"
+"#nivel-container {"
+"  width: 300px;"
+"  height: 200px;"
+"  background: #cfd8dc;"  // Azul acinzentado, simula o tanque
+"  border-radius: 20px;"
+"  margin: 20px auto;"
+"  position: relative;"
+"  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);"
+"  overflow: hidden;"
+"  border: 3px solid #90a4ae;"
+"}"
 
-    "<p>Estado do LED: <span id='estado'>--</span></p>"
+"#nivel {"
+"  position: absolute;"
+"  bottom: 0;"
+"  width: 100%;"
+"  background: #4CAF50;"  // Inicialmente verde
+"  color: white;"
+"  text-align: center;"
+"  font-size: 18px;"
+"  border-radius: 0 0 17px 17px;"
+"  transition: height 0.5s ease, background 0.5s ease;"
+"}"
+
+"input[type='number'] {"
+"  padding: 10px;"
+"  margin: 8px;"
+"  width: 120px;"
+"  border: 1px solid #ccc;"
+"  border-radius: 10px;"
+"  font-size: 16px;"
+"  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.05);"
+"  transition: border-color 0.3s;"
+"}"
+
+"input[type='number']:focus {"
+"  outline: none;"
+"  border-color: #007BFF;"
+"}"
+
+"button {"
+"  padding: 10px 25px;"
+"  margin-top: 15px;"
+"  font-size: 16px;"
+"  border: none;"
+"  border-radius: 10px;"
+"  background-color: #007BFF;"
+"  color: white;"
+"  cursor: pointer;"
+"  transition: background-color 0.3s ease, transform 0.2s ease;"
+"}"
+
+"button:hover {"
+"  background-color: #0056b3;"
+"  transform: scale(1.03);"
+"}"
+
+"@media (max-width: 500px) {"
+"  #nivel-container { width: 90%; height: 180px; }"
+"  input[type='number'] { width: 80px; }"
+"}"
+"</style>"
+
+"<script>"
+"function atualizar() {"
+"  fetch('/estado').then(res => res.json()).then(data => {"
+"    const nivel = data.nivel;"
+"    const bomba = data.bomba;"
+"    const nivelDiv = document.getElementById('nivel');"
+"    nivelDiv.style.height = nivel + '%';"
+"    nivelDiv.innerText = nivel + '%';"
+"    document.getElementById('estado_bomba').innerText = bomba ? 'Ligada' : 'Desligada';"
+
+"    if (nivel < 30) {"
+"      nivelDiv.style.background = '#f44336';"  
+"    } else if (nivel < 70) {"
+"      nivelDiv.style.background = '#ff9800';"  
+"    } else {"
+"      nivelDiv.style.background = '#4CAF50';"  
+"    }"
+"  });"
+"}"
+"function enviarLimites() {"
+"  const min = document.getElementById('min').value;"
+"  const max = document.getElementById('max').value;"
+"  fetch(`/config?min=${min}&max=${max}`);"
+"}"
+"setInterval(atualizar, 1000);"
+"</script></head><body>"
+
+"<h1>Controle de Nível do Reservatório</h1>"
+
+"<div id='nivel-container'>"
+"<div id='nivel' style='height: 0%'>0%</div>"
+"</div>"
+
+"<p>Estado da bomba: <strong id='estado_bomba'>--</strong></p>"
+
+"<h3>Configurar limites</h3>"
+"<div>"
+"  <input type='number' id='min' placeholder='Nível mínimo' min='0' max='100'>"
+"  <input type='number' id='max' placeholder='Nível máximo' min='0' max='100'><br>"
+"  <button onclick='enviarLimites()'>Atualizar Limites</button>"
+"<p id='mensagem' style='color: green; font-weight: bold;'></p>"
+"</div>"
 
 
-    "<button class='botao on' onclick=\"sendCommand('on')\">Ligar</button>"
-    "<button class='botao off' onclick=\"sendCommand('off')\">Desligar</button>"
 
-    "<hr style='margin-top: 20px;'>"
-    "<p style='font-size: 15px; color: #336699; font-style: italic; max-width: 90%; margin: 10px auto;'>"
-    "Utilização da BitDogLab para exemplificar a comunicação via rede Wi-Fi utilizando o protocolo HTML com JavaScript"
-    "</p>"
+"</body></html>";
 
-    "</body></html>";
 
 struct http_state
 {
@@ -80,47 +178,44 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     }
     hs->sent = 0;
 
-    if (strstr(req, "GET /led/on"))
+ 
+    if (strstr(req, "GET /estado"))
     {
-        gpio_put(LED_RED, 1);
-        const char *txt = "Ligado";
-        hs->len = snprintf(hs->response, sizeof(hs->response),
-                           "HTTP/1.1 200 OK\r\n"
-                           "Content-Type: text/plain\r\n"
-                           "Content-Length: %d\r\n"
-                           "Connection: close\r\n"
-                           "\r\n"
-                           "%s",
-                           (int)strlen(txt), txt);
-    }
-    else if (strstr(req, "GET /led/off"))
-    {
-        gpio_put(LED_RED, 0);
-        const char *txt = "Desligado";
-        hs->len = snprintf(hs->response, sizeof(hs->response),
-                           "HTTP/1.1 200 OK\r\n"
-                           "Content-Type: text/plain\r\n"
-                           "Content-Length: %d\r\n"
-                           "Connection: close\r\n"
-                           "\r\n"
-                           "%s",
-                           (int)strlen(txt), txt);
-    }    
-    else if (strstr(req, "GET /estado"))
-    {
-        char json_payload[96];
+        char json_payload[128];
         int json_len = snprintf(json_payload, sizeof(json_payload),
-                                "{\"led\":%d}\r\n",
-                                gpio_get(LED_RED));
-
+            "{\"nivel\":%d,\"bomba\":%d}\r\n",
+            nivel_atual, bomba_ligada);
+        
         hs->len = snprintf(hs->response, sizeof(hs->response),
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: application/json\r\n"
+            "Content-Length: %d\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+            "%s",
+            json_len, json_payload);
+        
+    }
+    else if (strstr(req, "GET /config?"))
+    {
+    int min = 0, max = 100;
+    sscanf(req, "GET /config?min=%d&max=%d", &min, &max);
+
+    // Simples validação
+    if (min >= 0 && max <= 100 && min < max) {
+        limite_min = min;
+        limite_max = max;
+    }
+
+    const char *msg = "Limites atualizados";
+    hs->len = snprintf(hs->response, sizeof(hs->response),
         "HTTP/1.1 200 OK\r\n"
-        "Content-Type: application/json\r\n"
+        "Content-Type: text/plain\r\n"
         "Content-Length: %d\r\n"
         "Connection: close\r\n"
         "\r\n"
         "%s",
-        json_len, json_payload);
+        (int)strlen(msg), msg);
     }
     else
     {
@@ -174,9 +269,6 @@ int main()
     stdio_init_all();
     sleep_ms(1000); // Aguarda a inicialização do console
 
-    gpio_init(LED_RED);
-    gpio_set_dir(LED_RED, GPIO_OUT);
-    gpio_put(LED_RED, 0);
 
     if(cyw43_arch_init()){
         printf("Erro ao inicializar o Wi-Fi\n");
@@ -193,6 +285,19 @@ int main()
 
     while (true) {
         cyw43_arch_poll();
+
+
+        /* SIMULAÇÃO DE LEITURA DO NÍVEL DO RESERVATÓRIO */
+        nivel_atual += (rand() % 7) - 3; // 
+        if (nivel_atual > 100) nivel_atual = 100;
+        if (nivel_atual < 0) nivel_atual = 0;
+
+        // Verifica se a bomba deve ser ligada ou desligada    
+        if (nivel_atual < limite_min) {
+            bomba_ligada = 1;
+        } else if (nivel_atual > limite_max) {
+            bomba_ligada = 0;
+        }
 
         sleep_ms(300);
     }
