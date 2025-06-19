@@ -19,21 +19,31 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PICO_BOARD pico_w CACHE STRING "Board type")
 include(pico_sdk_import.cmake)
 
-project(main C CXX ASM) 
+project(controle_de_nivel C CXX ASM) 
 pico_sdk_init()
 
 
 include_directories(${CMAKE_SOURCE_DIR}/libs/include) # Adiciona o diretório 'libs/include' à lista global de diretórios de headers 
 
 add_executable(${PROJECT_NAME}  
-        main.c # Código principal em C
+        main.c
         libs/src/conexao.c 
+        libs/src/buzzer.c 
         )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})  # Adiciona o diretório raiz como include privado apenas para o target atual
 
 target_link_libraries(${PROJECT_NAME} 
     pico_stdlib
+    hardware_gpio
+    hardware_adc
+    hardware_i2c
+    hardware_pwm
+    hardware_clocks
+    hardware_irq
+    hardware_pio
+    hardware_timer
+    pico_bootrom
     pico_cyw43_arch_lwip_threadsafe_background
         )
 
