@@ -14,7 +14,7 @@ void vTaskWaterLevelSensor(void *params)
 {
     adc_init();                         // Inicializa a leitura analógica
     adc_gpio_init(LEVEL_SENSOR_PIN);    // Configura o pino do sensor de nível como entrada analógica
-    adc_select_input(0);                // Seleciona o canal ADC 2 para leitura (conectado ao sensor)
+    adc_select_input(2);                // Seleciona o canal ADC 2 para leitura (conectado ao sensor)
 
     while (true)
     {

@@ -1,6 +1,7 @@
 #include "wifi.h"
 #include "tasks.h"
 #include "server.h"
+#include "globals.h"
 
 void vTaskWiFi(void *params)
 {
@@ -13,15 +14,15 @@ void vTaskWiFi(void *params)
 
     cyw43_arch_gpio_put(LED_PIN, 0);    // LED apagado inicialmente
     cyw43_arch_enable_sta_mode();       // Modo Station
-
+    wifi_connected = false;
     printf("Conectando à rede: %s\n", WIFI_SSID);
     while(cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASS, CYW43_AUTH_WPA2_AES_PSK, 1000)) {
         printf("ERRO: Falha ao conectar ao Wi-Fi. Tentando novamente...\n");
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
-
+    wifi_connected = true;
     printf("Conectado com sucesso!\n");
-    printf("--> ACESSE A PÁGINA EM: http://%s\n", ip4addr_ntoa(netif_ip4_addr(netif_default)));
+    snprintf(ip_address_str, sizeof(ip_address_str), "%s", ip4addr_ntoa(netif_ip4_addr(netif_default)));
     
     start_http_server();
 

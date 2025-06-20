@@ -1,120 +1,39 @@
+// server.c - VERSÃO CORRIGIDA E MELHORADA
+
 #include "server.h"
 #include "globals.h"
+#include "pico/time.h" // Adicionado para a função de alerta no display
 #include <string.h>
 #include <stdio.h>
 
-
+// O seu HTML_BODY está ótimo, permanece o mesmo.
 const char HTML_BODY[] =
 "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle de Nível</title>"
 "<style>"
-"body {"
-"  font-family: 'Segoe UI', sans-serif;"
-"  text-align: center;"
-"  background: linear-gradient(135deg, #e0f7fa, #f1f8e9);"
-"  padding: 20px;"
-"  color: #2c3e50;"
-"}"
-"h1 {"
-"  color: #2c3e50;"
-"  margin-bottom: 10px;"
-"}"
-"#nivel-container {"
-"  width: 300px;"
-"  height: 200px;"
-"  background: #cfd8dc;"
-"  border-radius: 20px;"
-"  margin: 20px auto;"
-"  position: relative;"
-"  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);"
-"  overflow: hidden;"
-"  border: 3px solid #90a4ae;"
-"}"
-"#nivel {"
-"  position: absolute;"
-"  bottom: 0;"
-"  width: 100%;"
-"  background: #4CAF50;"
-"  color: white;"
-"  text-align: center;"
-"  font-size: 18px;"
-"  border-radius: 0 0 17px 17px;"
-"  transition: height 0.5s ease, background 0.5s ease;"
-"}"
-"input[type='number'] {"
-"  padding: 10px;"
-"  margin: 8px;"
-"  width: 120px;"
-"  border: 1px solid #ccc;"
-"  border-radius: 10px;"
-"  font-size: 16px;"
-"  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.05);"
-"  transition: border-color 0.3s;"
-"}"
-"input[type='number']:focus {"
-"  outline: none;"
-"  border-color: #007BFF;"
-"}"
-"button {"
-"  padding: 10px 25px;"
-"  margin-top: 15px;"
-"  font-size: 16px;"
-"  border: none;"
-"  border-radius: 10px;"
-"  background-color: #007BFF;"
-"  color: white;"
-"  cursor: pointer;"
-"  transition: background-color 0.3s ease, transform 0.2s ease;"
-"}"
-"button:hover {"
-"  background-color: #0056b3;"
-"  transform: scale(1.03);"
-"}"
+"body{font-family:'Segoe UI',sans-serif;text-align:center;background:linear-gradient(135deg,#e0f7fa,#f1f8e9);padding:20px;color:#2c3e50}"
+"h1{color:#2c3e50;margin-bottom:10px}"
+"#nivel-container{width:300px;height:200px;background:#cfd8dc;border-radius:20px;margin:20px auto;position:relative;box-shadow:0 6px 15px rgba(0,0,0,.2);overflow:hidden;border:3px solid #90a4ae}"
+"#nivel{position:absolute;bottom:0;width:100%;background:#4CAF50;color:#fff;text-align:center;font-size:18px;border-radius:0 0 17px 17px;transition:height .5s ease,background .5s ease}"
+"input[type=number]{padding:10px;margin:8px;width:120px;border:1px solid #ccc;border-radius:10px;font-size:16px;box-shadow:inset 1px 1px 3px rgba(0,0,0,.05);transition:border-color .3s}"
+"input[type=number]:focus{outline:none;border-color:#007BFF}"
+"button{padding:10px 25px;margin-top:15px;font-size:16px;border:none;border-radius:10px;background-color:#007BFF;color:#fff;cursor:pointer;transition:background-color .3s ease,transform .2s ease}"
+"button:hover{background-color:#0056b3;transform:scale(1.03)}"
 "</style>"
 "<script>"
-"function atualizar() {"
-"  fetch('/estado').then(res => res.json()).then(data => {"
-"    const nivel = data.nivel;"
-"    const bomba = data.bomba;"
-"    const estado = data.estado;"  // 'Normal', 'Alerta' ou 'Erro'"
-""
-"    const nivelDiv = document.getElementById('nivel');"
-"    nivelDiv.style.height = nivel + '%';"
-"    nivelDiv.innerText = nivel.toFixed(1) + '%';"
-""
-"    document.getElementById('estado_bomba').innerText = bomba ? 'Ligada' : 'Desligada';"
-"    document.getElementById('estado_tanque').innerText = estado;"
-""
-"    let cor = '#f44336';"
-"    if (estado === 'Normal') cor = '#4CAF50';"
-"    else if (estado === 'Alerta') cor = '#ff9800';"
-""
-"    nivelDiv.style.background = cor;"
-"  });"
-"}"
-"function enviarLimites() {"
-"  const min = document.getElementById('min').value;"
-"  const max = document.getElementById('max').value;"
-"  if (!min || !max) { alert('Preencha ambos os campos!'); return; }"
-// LINHA CORRIGIDA ABAIXO:
-"  fetch(`/config?min=${min}&max=${max}`);"
-"}"
-"setInterval(atualizar, 1000);"
+"function atualizar(){fetch('/estado').then(res=>res.json()).then(data=>{const nivel=data.nivel;const bomba=data.bomba;const estado=data.estado;const nivelDiv=document.getElementById('nivel');nivelDiv.style.height=nivel+'%';nivelDiv.innerText=nivel.toFixed(1)+'%';document.getElementById('estado_bomba').innerText=bomba?'Ligada':'Desligada';document.getElementById('estado_tanque').innerText=estado;let cor='#f44336';if(estado==='Normal')cor='#4CAF50';else if(estado==='Alerta')cor='#ff9800';nivelDiv.style.background=cor})}"
+"function enviarLimites(){const min=document.getElementById('min').value;const max=document.getElementById('max').value;if(!min||!max){alert('Preencha ambos os campos!');return}fetch(`/config?min=${min}&max=${max}`)}"
+"setInterval(atualizar,1000);"
 "</script></head><body>"
 "<h1>Controle de Nível do Reservatório</h1>"
-"<div id='nivel-container'>"
-"<div id='nivel' style='height: 0%'>0%</div>"
-"</div>"
+"<div id='nivel-container'><div id='nivel' style='height:0%'>0%</div></div>"
 "<p>Estado da bomba: <strong id='estado_bomba'>--</strong></p>"
 "<p>Estado do tanque: <strong id='estado_tanque'>--</strong></p>"
 "<h3>Configurar limites</h3>"
 "<div>"
-"  <label for='min'>Ligar em:</label>"
-"  <input type='number' id='min' placeholder='ex: 20' min='0' max='100'>"
-"  <label for='max'>Desligar em:</label>"
-"  <input type='number' id='max' placeholder='ex: 80' min='0' max='100'><br>"
-"  <button onclick='enviarLimites()'>Atualizar Limites</button>"
-"</div>"
-"</body></html>";
+"<label for='min'>Ligar em:</label><input type='number' id='min' placeholder='ex: 20' min='0' max='100'>"
+"<label for='max'>Desligar em:</label><input type='number' id='max' placeholder='ex: 80' min='0' max='100'><br>"
+"<button onclick='enviarLimites()'>Atualizar Limites</button>"
+"</div></body></html>";
 
 
 struct http_state
@@ -138,16 +57,14 @@ static err_t http_sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
 
 static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
 {
-    if (!p)
-    {
+    if (!p) {
         tcp_close(tpcb);
         return ERR_OK;
     }
 
     char *req = (char *)p->payload;
     struct http_state *hs = malloc(sizeof(struct http_state));
-    if (!hs)
-    {
+    if (!hs) {
         pbuf_free(p);
         tcp_close(tpcb);
         return ERR_MEM;
@@ -156,18 +73,19 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
 
     if (strstr(req, "GET /estado"))
     {
-        const char *estado_str = "Erro";
+        const char *estado_str;
         switch (tank_state) {
-            case 1:
-                estado_str = "Alerta";
-            case 3:
-                estado_str = "Alerta";
-                break;
-            case 2:
-                estado_str = "Normal";
-                break;
-            default:
+            case 0: // Nível crítico baixo
+            case 4: // Nível crítico alto (transbordo)
                 estado_str = "Erro";
+                break;
+            case 1: // Alerta de nível baixo
+            case 3: // Alerta de nível alto
+                estado_str = "Alerta";
+                break;
+            case 2: // Nível Normal
+            default: // Caso seguro para qualquer outro valor
+                estado_str = "Normal";
                 break;
         }
 
@@ -175,7 +93,6 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
         int json_len = snprintf(json_payload, sizeof(json_payload),
             "{\"nivel\":%.1f,\"bomba\":%d,\"estado\":\"%s\"}\r\n",
             percentual_level_value, water_pump_state, estado_str);
-
         
         hs->len = snprintf(hs->response, sizeof(hs->response),
             "HTTP/1.1 200 OK\r\n"
@@ -185,7 +102,6 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
             "\r\n"
             "%s",
             json_len, json_payload);
-        
     }
     else if (strstr(req, "GET /config?"))
     {
@@ -195,6 +111,7 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
         if (min_val >= 0 && max_val <= 100 && min_val < max_val) {
             PUMP_ON_LEVEL = (float)min_val;
             PUMP_OFF_LEVEL = (float)max_val;
+            show_limits_display = time_us_64() + 3000000;
         }
 
         const char *msg = "OK";
@@ -236,13 +153,11 @@ static err_t connection_callback(void *arg, struct tcp_pcb *newpcb, err_t err)
 void start_http_server(void)
 {
     struct tcp_pcb *pcb = tcp_new();
-    if (!pcb)
-    {
+    if (!pcb) {
         printf("Erro ao criar PCB TCP\n");
         return;
     }
-    if (tcp_bind(pcb, IP_ADDR_ANY, 80) != ERR_OK)
-    {
+    if (tcp_bind(pcb, IP_ADDR_ANY, 80) != ERR_OK) {
         printf("Erro ao ligar o servidor na porta 80\n");
         return;
     }
