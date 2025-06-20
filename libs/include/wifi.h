@@ -7,9 +7,12 @@
 #include "lwip/tcp.h"            // Lightweight IP stack - fornece funções e estruturas para trabalhar com o protocolo TCP
 #include "lwip/netif.h"          // Lightweight IP stack - fornece funções e estruturas para trabalhar com interfaces de rede (netif)
 
+extern bool wifi_connected;         // Status do Wi-Fi (true/false)
+extern char ip_address_str[16];     // String para armazenar o endereço IP
+
 // Credenciais WIFI
-#define WIFI_SSID ""
-#define WIFI_PASS ""
+#define WIFI_SSID "CNAnet_ADRIANA"
+#define WIFI_PASS "vidanova"
 
 #define LED_PIN CYW43_WL_GPIO_LED_PIN   // GPIO do CI CYW43
 
