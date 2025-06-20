@@ -1,12 +1,7 @@
-#include "conexao.h"
+#include "server.h"
+#include "globals.h"
 #include <string.h>
 #include <stdio.h>
-
-
-extern float nivel_percentual_atual;
-extern volatile bool estadoBomba;
-extern float NIVEL_LIGAR_BOMBA;
-extern float NIVEL_DESLIGAR_BOMBA;
 
 
 const char HTML_BODY[] =
@@ -80,17 +75,20 @@ const char HTML_BODY[] =
 "  fetch('/estado').then(res => res.json()).then(data => {"
 "    const nivel = data.nivel;"
 "    const bomba = data.bomba;"
+"    const estado = data.estado;"  // 'Normal', 'Alerta' ou 'Erro'"
+""
 "    const nivelDiv = document.getElementById('nivel');"
 "    nivelDiv.style.height = nivel + '%';"
 "    nivelDiv.innerText = nivel.toFixed(1) + '%';"
+""
 "    document.getElementById('estado_bomba').innerText = bomba ? 'Ligada' : 'Desligada';"
-"    if (nivel < 30) {"
-"      nivelDiv.style.background = '#f44336';"
-"    } else if (nivel < 70) {"
-"      nivelDiv.style.background = '#ff9800';"
-"    } else {"
-"      nivelDiv.style.background = '#4CAF50';"
-"    }"
+"    document.getElementById('estado_tanque').innerText = estado;"
+""
+"    let cor = '#f44336';"
+"    if (estado === 'Normal') cor = '#4CAF50';"
+"    else if (estado === 'Alerta') cor = '#ff9800';"
+""
+"    nivelDiv.style.background = cor;"
 "  });"
 "}"
 "function enviarLimites() {"
@@ -107,6 +105,7 @@ const char HTML_BODY[] =
 "<div id='nivel' style='height: 0%'>0%</div>"
 "</div>"
 "<p>Estado da bomba: <strong id='estado_bomba'>--</strong></p>"
+"<p>Estado do tanque: <strong id='estado_tanque'>--</strong></p>"
 "<h3>Configurar limites</h3>"
 "<div>"
 "  <label for='min'>Ligar em:</label>"
@@ -157,10 +156,26 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
 
     if (strstr(req, "GET /estado"))
     {
-        char json_payload[128];
+        const char *estado_str = "Erro";
+        switch (tank_state) {
+            case 1:
+                estado_str = "Alerta";
+            case 3:
+                estado_str = "Alerta";
+                break;
+            case 2:
+                estado_str = "Normal";
+                break;
+            default:
+                estado_str = "Erro";
+                break;
+        }
+
+        char json_payload[256];
         int json_len = snprintf(json_payload, sizeof(json_payload),
-            "{\"nivel\":%.1f,\"bomba\":%d}\r\n",
-            nivel_percentual_atual, estadoBomba);
+            "{\"nivel\":%.1f,\"bomba\":%d,\"estado\":\"%s\"}\r\n",
+            percentual_level_value, water_pump_state, estado_str);
+
         
         hs->len = snprintf(hs->response, sizeof(hs->response),
             "HTTP/1.1 200 OK\r\n"
@@ -178,8 +193,8 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
         sscanf(req, "GET /config?min=%d&max=%d", &min_val, &max_val);
 
         if (min_val >= 0 && max_val <= 100 && min_val < max_val) {
-            NIVEL_LIGAR_BOMBA = (float)min_val;
-            NIVEL_DESLIGAR_BOMBA = (float)max_val;
+            PUMP_ON_LEVEL = (float)min_val;
+            PUMP_OFF_LEVEL = (float)max_val;
         }
 
         const char *msg = "OK";

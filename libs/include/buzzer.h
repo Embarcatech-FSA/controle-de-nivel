@@ -1,10 +1,12 @@
 #ifndef BUZZER_H
 #define BUZZER_H
 
-#include <stdint.h>
-#include "main.h"
+#include "hardware/pwm.h"
+#include "hardware/clocks.h"
+#include "globals.h"
 
-void buzzer_init();
-void buzzer_play_tone(uint freq, uint duration_ms);
+void set_buzzer_frequency(uint frequency);
+void play_buzzer(uint frequency);
+void stop_buzzer();
 
 #endif // BUZZER_H
