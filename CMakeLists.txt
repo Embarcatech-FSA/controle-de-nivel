@@ -19,19 +19,36 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PICO_BOARD pico_w CACHE STRING "Board type")
 include(pico_sdk_import.cmake)
 
+set(FREERTOS_KERNEL_PATH "C:/FreeRTOS-Kernel") # Adiciona o FreeRTOS
+include(${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake)
+
 project(controle_de_nivel C CXX ASM) 
 pico_sdk_init()
 
 
 include_directories(${CMAKE_SOURCE_DIR}/libs/include) # Adiciona o diretório 'libs/include' à lista global de diretórios de headers 
+include_directories(${CMAKE_SOURCE_DIR}/libs/include/ws2812) # Adiciona o diretório 'libs/include' à lista global de diretórios de headers 
+include_directories(${CMAKE_SOURCE_DIR}/libs/include/ssd1306) # Adiciona o diretório 'libs/include' à lista global de diretórios de headers 
 
 add_executable(${PROJECT_NAME}  
         main.c
-        libs/src/conexao.c 
-        libs/src/buzzer.c 
+        libs/source/server.c 
+        libs/source/buzzer.c 
+        libs/source/ssd1306.c
+        libs/source/ws2812.c
+        libs/source/tasks/wifi_task.c
+        libs/source/tasks/water_level_sensor_task.c
+        libs/source/tasks/relay_task.c
+        libs/source/tasks/system_control_task.c
+        libs/source/tasks/matrix_tank_level_task.c
         )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})  # Adiciona o diretório raiz como include privado apenas para o target atual
+
+pico_generate_pio_header(${PROJECT_NAME} 
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/include/ws2812/ws2812.pio 
+    OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated
+)
 
 target_link_libraries(${PROJECT_NAME} 
     pico_stdlib
@@ -45,6 +62,8 @@ target_link_libraries(${PROJECT_NAME}
     hardware_timer
     pico_bootrom
     pico_cyw43_arch_lwip_threadsafe_background
+    FreeRTOS-Kernel 
+    FreeRTOS-Kernel-Heap4
         )
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
