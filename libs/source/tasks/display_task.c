@@ -83,7 +83,7 @@ void vTaskDisplay(void *params) {
             }
             // --- Modo Operação Normal ---
             else {
-                // LÓGICA DE EXIBIÇÃO ORIGINAL
+
                 if (time_us_64() < show_limits_display) {
                     // TELA DE ALERTA DE LIMITES ATUALIZADOS
                     ssd1306_draw_string(&ssd, "Novos limites", 2, 8);
