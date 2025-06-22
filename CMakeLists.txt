@@ -19,7 +19,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PICO_BOARD pico_w CACHE STRING "Board type")
 include(pico_sdk_import.cmake)
 
-set(FREERTOS_KERNEL_PATH "/home/luis/pico_projects/residencia/FreeRTOS-Kernel") # Adiciona o FreeRTOS
+set(FREERTOS_KERNEL_PATH "C:/FreeRTOS-Kernel") # Adiciona o FreeRTOS
 include(${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake)
 
 project(controle_de_nivel C CXX ASM) 
@@ -42,6 +42,7 @@ add_executable(${PROJECT_NAME}
         libs/source/tasks/display_task.c
         libs/source/tasks/system_control_task.c
         libs/source/tasks/matrix_tank_level_task.c
+        libs/source/menu_control.c
         )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})  # Adiciona o diretório raiz como include privado apenas para o target atual
