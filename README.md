@@ -45,6 +45,12 @@ Criar um sistema embarcado que:
 
 - O botão é usado para redefinir os limites.
 
+### **LED RGB**
+
+- O LED RGB indica o estado da bomba:
+  - **Vermelho**: Bomba desligada
+  - **Verde**: Bomba ligada
+
 ## Conexão Wi-Fi 📡
 
 - O sistema se conecta a uma rede Wi-Fi para permitir o monitoramento remoto via página web.
