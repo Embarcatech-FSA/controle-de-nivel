@@ -20,6 +20,8 @@
 #define BTNA 5          	// Botão A
 #define BTNB 6          	// Botão B
 #define WS2812_PIN 7    	// Matriz de LEDs 5x5
+#define LED_GREEN 11        // Led verde
+#define LED_RED 13          // Led vermelho
 
 // Pinos de Hardware
 #define LEVEL_SENSOR_PIN    28
