@@ -19,6 +19,7 @@
 
 #define BTNA 5          	// Botão A
 #define BTNB 6          	// Botão B
+#define SW_BNT 22           // Botão SW
 #define WS2812_PIN 7    	// Matriz de LEDs 5x5
 
 // Pinos de Hardware

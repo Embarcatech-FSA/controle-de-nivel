@@ -3,6 +3,7 @@
 #include "server.h"   
 #include "buzzer.h"
 #include "globals.h"
+#include "button.h"
 #include "tasks.h"
 
 //Os Dados de wifi são definidos em wifi_task.h
@@ -40,7 +41,7 @@ int main()
     xTaskCreate(vTaskRelay, "Relay Task", configMINIMAL_STACK_SIZE + 128, NULL, 1, NULL);                       // Ativa ou desativa o relé
     xTaskCreate(vTaskSystemControl, "System Control Task", configMINIMAL_STACK_SIZE + 128, NULL, 1, NULL);      // Define o comportamento do sistema
     xTaskCreate(vTaskMatrixTankLevel, "Matrix Task", configMINIMAL_STACK_SIZE + 128, NULL, 1, NULL);            // Mostra o nivel do tanque na matriz
-
+    xTaskCreate(vTaskButton, "Button Task", configMINIMAL_STACK_SIZE + 128, NULL, 1, NULL); 
     vTaskStartScheduler();
     panic_unsupported();
 

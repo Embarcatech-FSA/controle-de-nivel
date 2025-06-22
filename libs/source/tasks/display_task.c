@@ -3,7 +3,7 @@
 #include "ssd1306.h"
 #include "wifi.h"
 #include "pico/time.h"
-
+#include "button.h"
 /*
     Aluno: Luis Felipe Pereira de Carvalho
 */
@@ -61,51 +61,69 @@ void vTaskDisplay(void *params) {
     while (true) {
         if (xSemaphoreTake(xDisplayMut, portMAX_DELAY) == pdTRUE) {
             
-            ssd1306_fill(&ssd, false); // Limpa o buffer
+            ssd1306_fill(&ssd, false); 
 
-            // --- LÓGICA DE EXIBIÇÃO: Alerta Temporário ou Tela Normal ---
-            if (time_us_64() < show_limits_display) {
-                // --- TELA DE ALERTA DE LIMITES ATUALIZADOS ---
-                ssd1306_draw_string(&ssd, "Novos limites", 2, 8);
-                ssd1306_draw_string(&ssd, "para bomba", 2, 17);
-                ssd1306_line(&ssd, 0, 32, 127, 32, true);
-
-                snprintf(line1_str, sizeof(line1_str), "Minimo: %.0f%%", PUMP_ON_LEVEL);
-                snprintf(line2_str, sizeof(line2_str), "Maximo: %.0f%%", PUMP_OFF_LEVEL);
-                ssd1306_draw_string(&ssd, line1_str, 4, 36);
-                ssd1306_draw_string(&ssd, line2_str, 4, 50);
-
-            } else {
-                // --- TELA NORMAL DE STATUS ---
-                ssd1306_draw_string(&ssd, "Sistema Nivel", 2, 0);
-                ssd1306_line(&ssd, 0, 10, DISPLAY_WIDTH - 1, 10, true);
-                ssd1306_line(&ssd, 64, 11, 64, DISPLAY_HEIGHT - 17, true);
-
-                snprintf(line1_str, sizeof(line1_str), "%.1f%%", percentual_level_value);
-                ssd1306_draw_string(&ssd, "Nivel:", 10, 14);
-                ssd1306_draw_string(&ssd, line1_str, 10, 28);
-                
-                snprintf(line1_str, sizeof(line1_str), "%s", water_pump_state ? "LIGADA" : "DESLIG");
-                ssd1306_draw_string(&ssd, "Bomba:", 74, 14);
-                ssd1306_draw_string(&ssd, line1_str, 74, 28);
-                
-                ssd1306_line(&ssd, 0, 48, DISPLAY_WIDTH - 1, 48, true);
-                
-                if (!wifi_connected) {
-                    snprintf(line1_str, sizeof(line1_str), "Erro: Sem Wi-Fi");
-                } else if (tank_state == 0) {
-                    snprintf(line1_str, sizeof(line1_str), "NIVEL BAIXO!!!");
-                } else if (tank_state == 4) {
-                    snprintf(line1_str, sizeof(line1_str), "TRANSBORDANDO!!!");
-                } else {
-                    snprintf(line1_str, sizeof(line1_str), "%s", ip_address_str);
+ // --- Modo Configuração ---
+            if (configState != CONFIG_OFF) {
+                char min_str[15], max_str[15];
+                snprintf(min_str, sizeof(min_str), "MIN: %.1f", PUMP_ON_LEVEL);
+                snprintf(max_str, sizeof(max_str), "MAX: %.1f", PUMP_OFF_LEVEL);
+            
+                switch(configState) {
+                    case CONFIG_MIN:
+                        ssd1306_draw_string(&ssd, min_str, 5, 15);
+                        ssd1306_draw_string(&ssd, max_str, 5, 25);
+                        break;
+                        
+                    case CONFIG_MAX:
+                        ssd1306_draw_string(&ssd, min_str, 5, 15);
+                        ssd1306_draw_string(&ssd, max_str, 5, 25);
+                        break;
                 }
-                ssd1306_draw_string(&ssd, line1_str, 2, 52);
+            }
+            // --- Modo Operação Normal ---
+            else {
+                // LÓGICA DE EXIBIÇÃO ORIGINAL
+                if (time_us_64() < show_limits_display) {
+                    // TELA DE ALERTA DE LIMITES ATUALIZADOS
+                    ssd1306_draw_string(&ssd, "Novos limites", 2, 8);
+                    ssd1306_draw_string(&ssd, "para bomba", 2, 17);
+                    ssd1306_line(&ssd, 0, 32, 127, 32, true);
+
+                    snprintf(line1_str, sizeof(line1_str), "Minimo: %.0f%%", PUMP_ON_LEVEL);
+                    snprintf(line2_str, sizeof(line2_str), "Maximo: %.0f%%", PUMP_OFF_LEVEL);
+                    ssd1306_draw_string(&ssd, line1_str, 4, 36);
+                    ssd1306_draw_string(&ssd, line2_str, 4, 50);
+                } else {
+                    // TELA NORMAL DE STATUS
+                    ssd1306_draw_string(&ssd, "Sistema Nivel", 2, 0);
+                    ssd1306_line(&ssd, 0, 10, DISPLAY_WIDTH - 1, 10, true);
+                    ssd1306_line(&ssd, 64, 11, 64, DISPLAY_HEIGHT - 17, true);
+
+                    snprintf(line1_str, sizeof(line1_str), "%.1f%%", percentual_level_value);
+                    ssd1306_draw_string(&ssd, "Nivel:", 10, 14);
+                    ssd1306_draw_string(&ssd, line1_str, 10, 28);
+                    
+                    snprintf(line1_str, sizeof(line1_str), "%s", water_pump_state ? "LIGADA" : "DESLIG");
+                    ssd1306_draw_string(&ssd, "Bomba:", 74, 14);
+                    ssd1306_draw_string(&ssd, line1_str, 74, 28);
+                    
+                    ssd1306_line(&ssd, 0, 48, DISPLAY_WIDTH - 1, 48, true);
+                    
+                    if (!wifi_connected) {
+                        snprintf(line1_str, sizeof(line1_str), "Erro: Sem Wi-Fi");
+                    } else if (tank_state == 0) {
+                        snprintf(line1_str, sizeof(line1_str), "NIVEL BAIXO!!!");
+                    } else if (tank_state == 4) {
+                        snprintf(line1_str, sizeof(line1_str), "TRANSBORDANDO!!!");
+                    } else {
+                        snprintf(line1_str, sizeof(line1_str), "%s", ip_address_str);
+                    }
+                    ssd1306_draw_string(&ssd, line1_str, 2, 52);
+                }
             }
 
-            // Envia o buffer para o display
             ssd1306_send_data(&ssd);
-
             xSemaphoreGive(xDisplayMut);
         }
         vTaskDelay(pdMS_TO_TICKS(250));
