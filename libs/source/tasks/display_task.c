@@ -3,6 +3,7 @@
 #include "ssd1306.h"
 #include "wifi.h"
 #include "pico/time.h"
+#include "menu_control.h"
 
 /*
     Aluno: Luis Felipe Pereira de Carvalho
@@ -53,6 +54,8 @@ void vTaskDisplay(void *params) {
     ssd1306_draw_string(&ssd, "Iniciando...", 18, 28);
     ssd1306_send_data(&ssd);
     
+    init_buttons();
+
     vTaskDelay(pdMS_TO_TICKS(2000));
 
     char line1_str[22];
@@ -64,7 +67,7 @@ void vTaskDisplay(void *params) {
             ssd1306_fill(&ssd, false); // Limpa o buffer
 
             // --- LÓGICA DE EXIBIÇÃO: Alerta Temporário ou Tela Normal ---
-            if (time_us_64() < show_limits_display) {
+            if (time_us_64() < show_limits_display || MENU_MODE) {
                 // --- TELA DE ALERTA DE LIMITES ATUALIZADOS ---
                 ssd1306_draw_string(&ssd, "Novos limites", 2, 8);
                 ssd1306_draw_string(&ssd, "para bomba", 2, 17);

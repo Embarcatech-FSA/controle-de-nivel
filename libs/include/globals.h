@@ -40,6 +40,7 @@ extern volatile uint64_t show_limits_display;
 extern float PUMP_ON_LEVEL;
 extern float PUMP_OFF_LEVEL;
 extern bool SHUTDOWN;
+extern uint8_t MENU_MODE;
 
 // --- tempos do buzzer ---
 #define BUZZER_ALERT_FREQ   1500 // F#6 (mais agudo e rápido)
