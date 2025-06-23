@@ -14,7 +14,7 @@ QueueHandle_t xButtonQueue;
 void button_isr(uint gpio, uint32_t events) {
     static int count = 0;
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if(gpio == SW_BNT || gpio == BTNA || gpio == BTNB) {
+    if(gpio == BTNA || gpio == BTNB) {
         xQueueSendFromISR(xButtonQueue, &gpio, &xHigherPriorityTaskWoken);
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }

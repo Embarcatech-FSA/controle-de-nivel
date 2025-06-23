@@ -21,9 +21,9 @@ void vTaskSystemControl(void *params) {
     while (true)
     {
         // --- LÓGICA DE CONTROLE DA BOMBA (HISTERESE) ---
-        if ((percentual_level_value < PUMP_ON_LEVEL) && !SHUTDOWN) {
+        if ((percentual_level_value <= PUMP_ON_LEVEL) && !SHUTDOWN) {
             water_pump_state = true;
-        } else if (percentual_level_value > PUMP_OFF_LEVEL || SHUTDOWN) {
+        } else if (percentual_level_value >= PUMP_OFF_LEVEL || SHUTDOWN) {
             water_pump_state = false;
         }
 

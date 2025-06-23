@@ -53,8 +53,6 @@ void vTaskDisplay(void *params) {
     ssd1306_draw_string(&ssd, "Iniciando...", 18, 28);
     ssd1306_send_data(&ssd);
     
-    init_buttons();
-
     vTaskDelay(pdMS_TO_TICKS(2000));
 
     char line1_str[22];
