@@ -26,8 +26,6 @@ void vTaskSystemControl(void *params) {
         } else if (percentual_level_value >= PUMP_OFF_LEVEL || SHUTDOWN) {
             water_pump_state = false;
         }
-
-
         // ESTADO DO TANQUE
         if(percentual_level_value < PUMP_ON_LEVEL-PUMP_ON_LEVEL*0.1) {
             tank_state = 0;
