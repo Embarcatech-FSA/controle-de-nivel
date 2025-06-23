@@ -48,8 +48,8 @@ Criar um sistema embarcado que:
 ### **LED RGB**
 
 - O LED RGB indica o estado da bomba:
-  - **Vermelho**: Bomba desligada
-  - **Verde**: Bomba ligada
+  - **Branco**: Bomba ativada
+  - **Apagado**: Bomba desativada
 
 ## Conexão Wi-Fi 📡
 
