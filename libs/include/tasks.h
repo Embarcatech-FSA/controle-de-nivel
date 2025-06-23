@@ -9,6 +9,7 @@
 
 extern SemaphoreHandle_t xDisplayMut;
 extern SemaphoreHandle_t xStopSem;
+extern SemaphoreHandle_t xADCMutex;
 
 void vTaskWiFi(void *params);
 void vTaskWaterLevelSensor(void *params);
@@ -16,5 +17,5 @@ void vTaskRelay(void *params);
 void vTaskSystemControl(void *params);
 void vTaskMatrixTankLevel(void *params);
 void vTaskDisplay(void *params);
-
+void vTaskButton(void *params);
 #endif

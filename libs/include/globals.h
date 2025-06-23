@@ -19,6 +19,9 @@
 
 #define BTNA 5          	// Botão A
 #define BTNB 6          	// Botão B
+#define SW_BNT 22           // Botão SW
+#define VRY 26              // Joystick eixo y
+#define VRX 27              // Joystick eixo x
 #define WS2812_PIN 7    	// Matriz de LEDs 5x5
 #define LED_GREEN 11        // Led verde
 #define LED_RED 13          // Led vermelho
@@ -29,8 +32,8 @@
 #define BUZZER_PIN          10
 
 // Calibração do Sensor ADC
-#define ADC_MIN_VALUE   500
-#define ADC_MAX_VALUE   3500
+#define ADC_MIN_VALUE   2200
+#define ADC_MAX_VALUE   3400
 
 // Variáveis de estado do sistema
 extern float percentual_level_value;
