@@ -20,7 +20,7 @@ const char HTML_BODY[] =
 "button:hover{background-color:#0056b3;transform:scale(1.03)}"
 "</style>"
 "<script>"
-"function atualizar(){fetch('/estado').then(res=>res.json()).then(data=>{const nivel=data.nivel;const bomba=data.bomba;const estado=data.estado;const nivelDiv=document.getElementById('nivel');nivelDiv.style.height=nivel+'%';nivelDiv.innerText=nivel.toFixed(1)+'%';document.getElementById('estado_bomba').innerText=bomba?'Ligada':'Desligada';document.getElementById('estado_tanque').innerText=estado;let cor='#f44336';if(estado==='Normal')cor='#4CAF50';else if(estado==='Alerta')cor='#ff9800';nivelDiv.style.background=cor})}"
+"function atualizar(){fetch('/estado').then(res=>res.json()).then(data=>{const nivel=data.nivel;const bomba=data.bomba;const estado=data.estado;const nivelDiv=document.getElementById('nivel');nivelDiv.style.height=nivel+'%';nivelDiv.innerText=nivel.toFixed(1)+'%';document.getElementById('estado_bomba').innerText=bomba?'Ligada':'Desligada';document.getElementById('estado_tanque').innerText=estado;let cor='#f44336';if(estado==='Normal')cor='#4CAF50';else if(estado==='Alerta')cor='#ff9800';nivelDiv.style.background=cor}); fetch('/limites').then(res=>res.json()).then(data=>{document.getElementById('limite_minimo').innerText=data.min;document.getElementById('limite_maximo').innerText=data.max});}"
 "function enviarLimites(){const min=document.getElementById('min').value;const max=document.getElementById('max').value;if(!min||!max){alert('Preencha ambos os campos!');return}fetch(`/config?min=${min}&max=${max}`)}"
 "setInterval(atualizar,1000);"
 "</script></head><body>"
@@ -28,6 +28,8 @@ const char HTML_BODY[] =
 "<div id='nivel-container'><div id='nivel' style='height:0%'>0%</div></div>"
 "<p>Estado da bomba: <strong id='estado_bomba'>--</strong></p>"
 "<p>Estado do tanque: <strong id='estado_tanque'>--</strong></p>"
+"<p>Limite mínimo atual: <strong id='limite_minimo'>--</strong></p>"
+"<p>Limite máximo atual: <strong id='limite_maximo'>--</strong></p>"
 "<h3>Configurar limites</h3>"
 "<div>"
 "<label for='min'>Ligar em:</label><input type='number' id='min' placeholder='ex: 20' min='0' max='100'>"
@@ -107,22 +109,27 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     {
         int min_val = 0, max_val = 100;
         sscanf(req, "GET /config?min=%d&max=%d", &min_val, &max_val);
-
+    
         if (min_val >= 0 && max_val <= 100 && min_val < max_val) {
             PUMP_ON_LEVEL = (float)min_val;
             PUMP_OFF_LEVEL = (float)max_val;
             show_limits_display = time_us_64() + 3000000;
         }
-
-        const char *msg = "OK";
-        hs->len = snprintf(hs->response, sizeof(hs->response),
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/plain\r\n"
-            "Content-Length: %d\r\n"
-            "Connection: close\r\n"
-            "\r\n"
-            "%s",
-            (int)strlen(msg), msg);
+    } 
+    else if(strstr(req, "GET /limites")){
+        char json_payload[256];
+        int json_len = snprintf(json_payload, sizeof(json_payload),
+            "{\"min\":%.1f,\"max\":%.1f}\r\n",
+            PUMP_ON_LEVEL, PUMP_OFF_LEVEL);
+        
+            hs->len = snprintf(hs->response, sizeof(hs->response),
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: application/json\r\n"
+                "Content-Length: %d\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "%s",
+                json_len, json_payload);
     }
     else
     {

@@ -44,6 +44,7 @@ add_executable(${PROJECT_NAME}
         libs/source/tasks/display_task.c
         libs/source/tasks/system_control_task.c
         libs/source/tasks/matrix_tank_level_task.c
+        libs/source/menu_control.c
         )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})  # Adiciona o diretório raiz como include privado apenas para o target atual

@@ -23,6 +23,8 @@
 #define VRY 26              // Joystick eixo y
 #define VRX 27              // Joystick eixo x
 #define WS2812_PIN 7    	// Matriz de LEDs 5x5
+#define LED_GREEN 11        // Led verde
+#define LED_RED 13          // Led vermelho
 
 // Pinos de Hardware
 #define LEVEL_SENSOR_PIN    28
@@ -43,6 +45,7 @@ extern volatile uint64_t show_limits_display;
 extern float PUMP_ON_LEVEL;
 extern float PUMP_OFF_LEVEL;
 extern bool SHUTDOWN;
+extern uint8_t MENU_MODE;
 
 // --- tempos do buzzer ---
 #define BUZZER_ALERT_FREQ   1500 // F#6 (mais agudo e rápido)

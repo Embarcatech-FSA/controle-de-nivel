@@ -7,6 +7,13 @@ void vTaskRelay(void *params)
     gpio_set_dir(RELAY_PIN, GPIO_OUT);  // Configura o pino como saída
     gpio_put(RELAY_PIN, false);         // Garante que a bomba comece desligada
 
+    gpio_init(LED_GREEN);              // Inicializa o LED verde
+    gpio_set_dir(LED_GREEN, GPIO_OUT); // Configura o LED verde como saída
+    gpio_init(LED_RED);                // Inicializa o LED vermelho
+    gpio_set_dir(LED_RED, GPIO_OUT);   // Configura o LED vermelho como saída
+
+    gpio_put(LED_RED, true);           // LED vermelho inicialmente ligado, indicando que a bomba está desligada
+
     bool critical_level_alert;
 
     while (true)
@@ -14,6 +21,8 @@ void vTaskRelay(void *params)
         // --- ATUAÇÃO NO RELÉ ---
         gpio_put(RELAY_PIN, water_pump_state);
 
+        gpio_put(LED_GREEN, water_pump_state); // LED verde indica que a bomba está ligada
+        gpio_put(LED_RED, !water_pump_state);  // LED vermelho indica que a bomba está desligada
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     

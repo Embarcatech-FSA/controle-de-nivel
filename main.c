@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "button.h"
 #include "tasks.h"
+#include "menu_control.h"
 
 //Os Dados de wifi são definidos em wifi_task.h
 
@@ -19,6 +20,7 @@ bool critical_level_alert = false;
 float PUMP_ON_LEVEL = 20.0f;
 float PUMP_OFF_LEVEL = 80.0f;
 bool SHUTDOWN = false;
+uint8_t MENU_MODE = 0; // 0 = Normal, 1 = Exibe configuração de limites, 2 = Reseta os limites
 bool wifi_connected = false;
 char ip_address_str[16] = "0.0.0.0";
 
