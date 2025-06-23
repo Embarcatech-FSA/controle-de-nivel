@@ -25,6 +25,7 @@
 #define WS2812_PIN 7    	// Matriz de LEDs 5x5
 #define LED_GREEN 11        // Led verde
 #define LED_RED 13          // Led vermelho
+#define LED_BLUE 12         // Led azul
 
 // Pinos de Hardware
 #define LEVEL_SENSOR_PIN    28

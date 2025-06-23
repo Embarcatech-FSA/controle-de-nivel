@@ -36,10 +36,10 @@ void vTaskSystemControl(void *params) {
         else if(PUMP_ON_LEVEL <  percentual_level_value && percentual_level_value < PUMP_OFF_LEVEL) {
             tank_state = 2;
         }
-        else if(PUMP_OFF_LEVEL < percentual_level_value && percentual_level_value < PUMP_OFF_LEVEL+PUMP_ON_LEVEL*0.1) {
+        else if(PUMP_OFF_LEVEL < percentual_level_value && percentual_level_value < PUMP_OFF_LEVEL+PUMP_OFF_LEVEL*0.1) {
             tank_state = 3;
         }
-        else if(percentual_level_value > PUMP_OFF_LEVEL+PUMP_ON_LEVEL*0.1) {
+        else if(percentual_level_value > PUMP_OFF_LEVEL+PUMP_OFF_LEVEL*0.1) {
             tank_state = 4;
         }
 
