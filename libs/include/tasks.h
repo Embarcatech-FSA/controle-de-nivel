@@ -9,6 +9,7 @@
 
 extern SemaphoreHandle_t xDisplayMut;
 extern SemaphoreHandle_t xStopSem;
+extern SemaphoreHandle_t xADCMutex;
 
 void vTaskWiFi(void *params);
 void vTaskWaterLevelSensor(void *params);

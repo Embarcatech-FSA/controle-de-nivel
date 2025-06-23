@@ -13,7 +13,6 @@ typedef enum {
 
 // Variáveis compartilhadas
 extern ConfigState configState;
-//extern SemaphoreHandle_t xDisplayMutex;
 extern TaskHandle_t xButtonTaskHandle;
 extern QueueHandle_t xButtonQueue;
 
@@ -21,5 +20,6 @@ extern QueueHandle_t xButtonQueue;
 void button_isr(uint gpio, uint32_t events);
 void process_button_press(uint gpio);
 void vTaskButton(void *pvParameters);
+void process_joystick_movement();
 
 #endif // BUTTON_H

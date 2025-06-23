@@ -11,8 +11,8 @@ extern bool wifi_connected;         // Status do Wi-Fi (true/false)
 extern char ip_address_str[16];     // String para armazenar o endereço IP
 
 // Credenciais WIFI
-#define WIFI_SSID ""
-#define WIFI_PASS ""
+#define WIFI_SSID "Caverna 2.4G" 
+#define WIFI_PASS "Oddilson"
 
 #define LED_PIN CYW43_WL_GPIO_LED_PIN   // GPIO do CI CYW43
 
